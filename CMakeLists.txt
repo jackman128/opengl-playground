@@ -1,0 +1,44 @@
+cmake_minimum_required (VERSION 2.6)
+project(opengl-playground)
+find_package(PkgConfig)
+
+if( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
+    message( FATAL_ERROR "Please select another Build Directory.)" )
+endif()
+if( CMAKE_SOURCE_DIR MATCHES " " )
+	message( "Your Source Directory contains spaces." )
+endif()
+if( CMAKE_BINARY_DIR MATCHES " " )
+	message( "Your Build Directory contains spaces." )
+endif()
+
+# Bump up warning levels appropriately for clang, gcc & msvc
+# Also set debug/optimization flags depending on the build type. IDE users choose this when
+# selecting the build mode in their IDE
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "gcc")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=gnu++11")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -g")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} -O2")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+	if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+		string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	else()
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+	endif()
+endif()
+
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(GLEW REQUIRED)
+pkg_search_module(SDL2 REQUIRED sdl2)
+set(INCLUDE_DIRS ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+set(LIBRARIES ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES})
+
+set(RESOURCES "shaders/one.frag" "shaders/one.vert")
+foreach(file ${RESOURCES})
+  configure_file(${CMAKE_SOURCE_DIR}/${file} ${CMAKE_BINARY_DIR}/${file} COPYONLY)
+endforeach(file)
+
+add_executable(main src/main.cpp src/shader.cpp)
+target_link_libraries(main ${LIBRARIES})
+target_include_directories(main PUBLIC ${INCLUDE_DIRS})

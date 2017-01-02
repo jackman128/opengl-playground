@@ -4,9 +4,6 @@
 [submodule "gli"]
 	path = gli
 	url = https://github.com/g-truc/gli.git
-[submodule "cotire"]
-	path = cotire
-	url = https://github.com/sakra/cotire.git
 [submodule "glm"]
 	path = glm
 	url = https://github.com/g-truc/glm.git

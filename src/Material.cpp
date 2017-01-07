@@ -1,5 +1,7 @@
-#include "shader.hpp"
-Shader::Shader(const std::string vertexPath, const std::string fragmentPath) {
+#include "Material.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
+Material::Material(const std::string &vertexPath, const std::string &fragmentPath) {
   std::ifstream vertFin, fragFin;
   std::string vertSource, fragSource;
 
@@ -68,8 +70,48 @@ Shader::Shader(const std::string vertexPath, const std::string fragmentPath) {
   //delete shaders
   glDeleteShader(vertex);
   glDeleteShader(fragment);
+
+  InitUniforms();
 }
 
-void Shader::Use() {
+Material::~Material() {
+  glDeleteProgram(this->Program);
+}
+
+void Material::Use() {
   glUseProgram(this->Program);
+}
+
+void Material::InitUniforms() {
+  GLint numUniforms, uniLocation, length, buffSize = 256;
+  GLchar buffer[256];
+  GLenum type;
+  glGetProgramiv(this->Program, GL_ACTIVE_UNIFORMS, &numUniforms);
+
+  for (GLint i = 0; i < numUniforms; i++) {
+    glGetActiveUniform(this->Program, i, buffSize, NULL, &length, &type, buffer);
+    uniLocation = glGetUniformLocation(this->Program, buffer);
+    Uniform uni;
+    uni.type = type;
+    uni.location = uniLocation;
+    Uniforms.insert(std::pair<std::string, Uniform>(std::string(buffer), uni));
+  }
+}
+
+void Material::SetUniform(const std::string &name, float v0){
+  if (Uniforms[name].type != GL_FLOAT)
+    throw "error";
+  glProgramUniform1f(this->Program, Uniforms[name].location, v0);
+}
+
+void Material::SetUniform(const std::string &name, const glm::vec3 &vec) {
+  if (Uniforms[name].type != GL_FLOAT_VEC3)
+    throw "error";
+  glProgramUniform3f(this->Program, Uniforms[name].location, vec.x, vec.y, vec.z);
+}
+
+void Material::SetUniform(const std::string &name, const glm::mat4 &mat) {
+  if (Uniforms[name].type != GL_FLOAT_MAT4)
+    throw "error";
+  glProgramUniformMatrix4fv(this->Program, Uniforms[name].location, 1, GL_FALSE, glm::value_ptr(mat));
 }

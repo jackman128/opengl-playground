@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "shader.hpp"
+#include "Material.hpp"
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
@@ -100,29 +100,11 @@ int main(int argc, char **argv) {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
 
-  /*
-  //tex attrib
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(2);
-  */
-
-  /*
   glBindVertexArray(0);
   glEnableVertexAttribArray(0);
-
-  glBindVertexArray(lightVao);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-  glEnableVertexAttribArray(0);
-  glBindVertexArray(0);
-  */
  
-  Shader shaderOne(vertexPath, fragmentPath);
-  Shader lampShader(vertexPath, "shaders/lamp.frag");
-  GLint objectColorLoc = glGetUniformLocation(shaderOne.Program, "objectColor");
-  GLint lightColorLoc = glGetUniformLocation(shaderOne.Program, "lightColor");
-  GLint lightPosLoc = glGetUniformLocation(shaderOne.Program, "lightPos");
-  GLint viewPosLoc = glGetUniformLocation(shaderOne.Program, "viewPos");
+  Material shaderOne(vertexPath, fragmentPath);
+  Material lampShader(vertexPath, "shaders/lamp.frag");
 
   /*
   //init texture
@@ -133,17 +115,6 @@ int main(int argc, char **argv) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  //init texture
-  GLuint texture2 = CreateTexture(texture2Path.c_str());
-  if (texture2 == 0)
-    throw "GLI goof";
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
   glBindTexture(GL_TEXTURE_2D, 0);
   */
 
@@ -168,7 +139,7 @@ int main(int argc, char **argv) {
     glm::vec3( 1.5f,  0.2f, -1.5f),
     glm::vec3(-1.3f,  1.0f, -1.5f)
   };
-  glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+  glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
   glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
   glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
@@ -236,10 +207,7 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
-    /*
-    GLuint offsetUniform = glGetUniformLocation(shaderOne.Program, "offset");
-    glUniform1f(offsetUniform, sin(time) / 2.0f);
-    */
+    lightPos.x = sin(time) * 5;
 
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -248,29 +216,24 @@ int main(int argc, char **argv) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
     glUniform1i(glGetUniformLocation(shaderOne.Program, "texture1"), 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    glUniform1i(glGetUniformLocation(shaderOne.Program, "texture2"), 1);
     */
 
     shaderOne.Use();
 
-        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.3f);
-    glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-    glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+    shaderOne.SetUniform("objectColor", glm::vec3(1.0f, 0.5f, 0.3f));
+    shaderOne.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shaderOne.SetUniform("lightPos", lightPos);
+    shaderOne.SetUniform("viewPos", cameraPos);
 
     glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
-    GLint viewLoc = glGetUniformLocation(shaderOne.Program, "view");
-    GLint projLoc = glGetUniformLocation(shaderOne.Program, "proj");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+    shaderOne.SetUniform("view", view);
+    shaderOne.SetUniform("proj", proj);
 
     glBindVertexArray(vao);
     for(int i = 0; i < cubePositions.size(); i++) {
       glm::mat4 model;
       model = glm::translate(model, cubePositions[i]);
-      glUniformMatrix4fv(glGetUniformLocation(shaderOne.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+      shaderOne.SetUniform("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
@@ -278,12 +241,9 @@ int main(int argc, char **argv) {
     glm::mat4 model;
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    GLuint modelLoc = glGetUniformLocation(lampShader.Program, "model");
-    viewLoc = glGetUniformLocation(lampShader.Program, "view");
-    projLoc = glGetUniformLocation(lampShader.Program, "proj");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+    lampShader.SetUniform("model", model);
+    lampShader.SetUniform("view", view);
+    lampShader.SetUniform("proj", proj);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 

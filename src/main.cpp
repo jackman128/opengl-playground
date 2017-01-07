@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "shader.hpp"
+#include "material.hpp"
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
@@ -22,57 +22,53 @@ const std::string vertexPath = "shaders/one.vert";
 const std::string fragmentPath = "shaders/one.frag";
 const std::string texture1Path = "textures/container.dds";
 const std::string texture2Path = "textures/fish.dds";
-const int windowWidth = 960;
-const int windowHeight = 540;
+const int windowWidth = 1800;
+const int windowHeight = 900;
 const GLfloat cameraSpeed = 5.0f;
 
 const GLfloat vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  //vertex                surface normal
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
-const GLuint indices[] = {
-  0, 1, 3, //first tri
-  1, 2, 3  //second tri
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
 int main(int argc, char **argv) {
@@ -87,26 +83,42 @@ int main(int argc, char **argv) {
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
   
-  GLuint vbo, vao;
+  GLuint vbo, vao, lightVao;
   glGenBuffers(1, &vbo);
   glGenVertexArrays(1, &vao);
+  glGenVertexArrays(1, &lightVao);
   glBindVertexArray(vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   //position attrib
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(0);
 
+  //surface normal attrib
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(1);
+
+  /*
   //tex attrib
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(2);
+  */
 
+  glBindVertexArray(0);
+  glEnableVertexAttribArray(0);
+
+  glBindVertexArray(lightVao);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+  glEnableVertexAttribArray(0);
   glBindVertexArray(0);
  
   Shader shaderOne(vertexPath, fragmentPath);
+  Shader lampShader(vertexPath, "shaders/lamp.frag");
 
+  /*
   //init texture
   GLuint texture1 = CreateTexture(texture1Path.c_str());
   if (texture1 == 0)
@@ -127,25 +139,29 @@ int main(int argc, char **argv) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
   glBindTexture(GL_TEXTURE_2D, 0);
+  */
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_BACK);
+  //glEnable (GL_BLEND);
+  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glm::vec3 cubePositions[] = {
+  std::vector<glm::vec3> cubePositions = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
     glm::vec3( 2.0f,  5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3( 2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f,  3.0f, -7.5f),
-    glm::vec3( 1.3f, -2.0f, -2.5f),
-    glm::vec3( 1.5f,  2.0f, -2.5f),
-    glm::vec3( 1.5f,  0.2f, -1.5f),
-    glm::vec3(-1.3f,  1.0f, -1.5f)
+    //    glm::vec3(-1.5f, -2.2f, -2.5f),
+    //glm::vec3(-3.8f, -2.0f, -12.3f),
+    //glm::vec3( 2.4f, -0.4f, -3.5f),
+    //glm::vec3(-1.7f,  3.0f, -7.5f),
+    //glm::vec3( 1.3f, -2.0f, -2.5f),
+    //glm::vec3( 1.5f,  2.0f, -2.5f),
+    //glm::vec3( 1.5f,  0.2f, -1.5f),
+    //glm::vec3(-1.3f,  1.0f, -1.5f)
   };
+  glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
   glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
   glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
@@ -194,9 +210,9 @@ int main(int argc, char **argv) {
     if (keys[SDL_SCANCODE_D])
       cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(-1.0f, 0.0f, 0.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_Q])
-      cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, -1.0f, 0.0f)) * cameraSpeed * deltaTime;
-    if (keys[SDL_SCANCODE_E])
       cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(0.0f, -1.0f, 0.0f)) * cameraSpeed * deltaTime;
+    if (keys[SDL_SCANCODE_E])
+      cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, -1.0f, 0.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_ESCAPE])
       break;
 
@@ -213,40 +229,62 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
+    /*
     GLuint offsetUniform = glGetUniformLocation(shaderOne.Program, "offset");
-    glUniform1f(offsetUniform, sin(time) / 3.0f);
+    glUniform1f(offsetUniform, sin(time) / 2.0f);
+    */
 
     //render
-    glClearColor(0.8, 0.8, 0.8, 1.0);
+    glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /*
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
     glUniform1i(glGetUniformLocation(shaderOne.Program, "texture1"), 0);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
     glUniform1i(glGetUniformLocation(shaderOne.Program, "texture2"), 1);
+    */
 
     shaderOne.Use();
 
-    glm::mat4 proj;
-    proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
+    GLint objectColorLoc = glGetUniformLocation(shaderOne.Program, "objectColor");
+    GLint lightColorLoc = glGetUniformLocation(shaderOne.Program, "lightColor");
+    GLint lightPosLoc = glGetUniformLocation(shaderOne.Program, "lightPos");
+    GLint viewPosLoc = glGetUniformLocation(shaderOne.Program, "viewPos");
+    glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.3f);
+    glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+    glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+
+    glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
     GLint viewLoc = glGetUniformLocation(shaderOne.Program, "view");
     GLint projLoc = glGetUniformLocation(shaderOne.Program, "proj");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 
     glBindVertexArray(vao);
-    for(GLuint i = 0; i < 10; i++) {
-      GLfloat angle;
+    for(int i = 0; i < cubePositions.size(); i++) {
       glm::mat4 model;
       model = glm::translate(model, cubePositions[i]);
-      if (i % 2 == 0) angle = 20.0f * i + time / 3.0f;
-      else angle = 20.0f * i;
-      model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
       glUniformMatrix4fv(glGetUniformLocation(shaderOne.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+    glBindVertexArray(0);
+
+    lampShader.Use();
+    glm::mat4 model;
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));
+    GLuint modelLoc = glGetUniformLocation(lampShader.Program, "model");
+    viewLoc = glGetUniformLocation(lampShader.Program, "view");
+    projLoc = glGetUniformLocation(lampShader.Program, "proj");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+    glBindVertexArray(lightVao);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
     SDL_GL_SwapWindow(window);

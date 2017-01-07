@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "material.hpp"
+#include "shader.hpp"
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
@@ -106,6 +106,7 @@ int main(int argc, char **argv) {
   glEnableVertexAttribArray(2);
   */
 
+  /*
   glBindVertexArray(0);
   glEnableVertexAttribArray(0);
 
@@ -114,9 +115,14 @@ int main(int argc, char **argv) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(0);
   glBindVertexArray(0);
+  */
  
   Shader shaderOne(vertexPath, fragmentPath);
   Shader lampShader(vertexPath, "shaders/lamp.frag");
+  GLint objectColorLoc = glGetUniformLocation(shaderOne.Program, "objectColor");
+  GLint lightColorLoc = glGetUniformLocation(shaderOne.Program, "lightColor");
+  GLint lightPosLoc = glGetUniformLocation(shaderOne.Program, "lightPos");
+  GLint viewPosLoc = glGetUniformLocation(shaderOne.Program, "viewPos");
 
   /*
   //init texture
@@ -148,18 +154,19 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable (GL_BLEND);
   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glClearColor(0.1, 0.1, 0.1, 1.0);
 
   std::vector<glm::vec3> cubePositions = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
     glm::vec3( 2.0f,  5.0f, -15.0f),
-    //    glm::vec3(-1.5f, -2.2f, -2.5f),
-    //glm::vec3(-3.8f, -2.0f, -12.3f),
-    //glm::vec3( 2.4f, -0.4f, -3.5f),
-    //glm::vec3(-1.7f,  3.0f, -7.5f),
-    //glm::vec3( 1.3f, -2.0f, -2.5f),
-    //glm::vec3( 1.5f,  2.0f, -2.5f),
-    //glm::vec3( 1.5f,  0.2f, -1.5f),
-    //glm::vec3(-1.3f,  1.0f, -1.5f)
+    glm::vec3(-1.5f, -2.2f, -2.5f),
+    glm::vec3(-3.8f, -2.0f, -12.3f),
+    glm::vec3( 2.4f, -0.4f, -3.5f),
+    glm::vec3(-1.7f,  3.0f, -7.5f),
+    glm::vec3( 1.3f, -2.0f, -2.5f),
+    glm::vec3( 1.5f,  2.0f, -2.5f),
+    glm::vec3( 1.5f,  0.2f, -1.5f),
+    glm::vec3(-1.3f,  1.0f, -1.5f)
   };
   glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
@@ -235,7 +242,6 @@ int main(int argc, char **argv) {
     */
 
     //render
-    glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /*
@@ -249,11 +255,7 @@ int main(int argc, char **argv) {
 
     shaderOne.Use();
 
-    GLint objectColorLoc = glGetUniformLocation(shaderOne.Program, "objectColor");
-    GLint lightColorLoc = glGetUniformLocation(shaderOne.Program, "lightColor");
-    GLint lightPosLoc = glGetUniformLocation(shaderOne.Program, "lightPos");
-    GLint viewPosLoc = glGetUniformLocation(shaderOne.Program, "viewPos");
-    glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.3f);
+        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.3f);
     glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
     glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
     glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
@@ -271,7 +273,6 @@ int main(int argc, char **argv) {
       glUniformMatrix4fv(glGetUniformLocation(shaderOne.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-    glBindVertexArray(0);
 
     lampShader.Use();
     glm::mat4 model;
@@ -283,7 +284,6 @@ int main(int argc, char **argv) {
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-    glBindVertexArray(lightVao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 

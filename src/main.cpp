@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include "context.hpp"
 #include "Material.hpp"
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
@@ -82,6 +83,14 @@ int main(int argc, char **argv) {
   
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
+  GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+  if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    {
+      glEnable(GL_DEBUG_OUTPUT);
+      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+      glDebugMessageCallback(glDebugOutput, nullptr);
+      glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
   
   GLuint vbo, vao, lightVao;
   glGenBuffers(1, &vbo);
@@ -125,7 +134,7 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable (GL_BLEND);
   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.1, 0.1, 0.1, 1.0);
+  glClearColor(0.0, 0.0, 0.0, 1.0);
 
   std::vector<glm::vec3> cubePositions = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -220,11 +229,19 @@ int main(int argc, char **argv) {
 
     shaderOne.Use();
 
-    shaderOne.SetUniform("objectColor", glm::vec3(1.0f, 0.5f, 0.3f));
-    shaderOne.SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    shaderOne.SetUniform("lightPos", lightPos);
     shaderOne.SetUniform("viewPos", cameraPos);
 
+
+    shaderOne.SetUniform("light.position", lightPos);
+    shaderOne.SetUniform("light.ambient", glm::vec3(0.2));
+    shaderOne.SetUniform("light.diffuse", glm::vec3(1.0));
+    shaderOne.SetUniform("light.specular", glm::vec3(1.0));
+
+    shaderOne.SetUniform("material.ambient", glm::vec3(0.0, 	0.1, 	0.06));
+    shaderOne.SetUniform("material.diffuse", glm::vec3(0.0, 	0.50980392, 	0.50980392));
+    shaderOne.SetUniform("material.specular", glm::vec3(0.50196078, 	0.50196078, 	0.50196078));
+    shaderOne.SetUniform("material.shininess", 0.25 * 128.0f);
+      
     glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
     shaderOne.SetUniform("view", view);
     shaderOne.SetUniform("proj", proj);
@@ -277,6 +294,9 @@ bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
   else {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#ifndef NDEBUG
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif //NDEBUG
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

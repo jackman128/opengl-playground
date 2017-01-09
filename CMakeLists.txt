@@ -40,7 +40,7 @@ foreach(file ${RESOURCES})
   configure_file(${CMAKE_SOURCE_DIR}/${file} ${CMAKE_BINARY_DIR}/${file} COPYONLY)
 endforeach(file)
 
-add_executable(main src/main.cpp src/Material.cpp)
+add_executable(main src/main.cpp src/Material.cpp src/context.cpp)
 target_link_libraries(main ${LIBRARIES})
 target_include_directories(main PUBLIC ${INCLUDE_DIRS})
 cotire(main)

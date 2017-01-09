@@ -23,8 +23,8 @@ const std::string vertexPath = "shaders/one.vert";
 const std::string fragmentPath = "shaders/one.frag";
 const std::string texture1Path = "textures/container.dds";
 const std::string texture2Path = "textures/fish.dds";
-const int windowWidth = 1800;
-const int windowHeight = 900;
+const int windowWidth = 854;
+const int windowHeight = 480;
 const GLfloat cameraSpeed = 5.0f;
 
 const GLfloat vertices[] = {
@@ -112,8 +112,8 @@ int main(int argc, char **argv) {
   glBindVertexArray(0);
   glEnableVertexAttribArray(0);
  
-  Material shaderOne(vertexPath, fragmentPath);
-  Material lampShader(vertexPath, "shaders/lamp.frag");
+  Material shaderOne({vertexPath, fragmentPath});
+  Material lampShader({vertexPath, "shaders/lamp.frag"});
 
   /*
   //init texture
@@ -150,8 +150,6 @@ int main(int argc, char **argv) {
   };
   glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
-  glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
-  glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
   glm::quat cameraQuat;
 
   SDL_Event windowEvent;
@@ -163,6 +161,7 @@ int main(int argc, char **argv) {
   GLfloat lastFrame = 0.0f;
   GLfloat fov = 45.0f;
   int mouseX, mouseY;
+  bool nofocus = false;
   mouseX = mouseY = 0;
 
   std::vector<bool> keys(256, false);
@@ -178,8 +177,10 @@ int main(int argc, char **argv) {
         keys[windowEvent.key.keysym.scancode] = false;
       }
       else if (windowEvent.type == SDL_MOUSEMOTION) {
-        mouseX = windowEvent.motion.xrel;
-        mouseY = windowEvent.motion.yrel;
+        if (!nofocus) {
+          mouseX = windowEvent.motion.xrel;
+          mouseY = windowEvent.motion.yrel;
+        }
       }
     }
 
@@ -187,6 +188,7 @@ int main(int argc, char **argv) {
     GLfloat time = SDL_GetTicks() / 1000.0f;
     deltaTime = time - lastFrame;
     lastFrame = time;
+    float roll;
     //do movement
     if (keys[SDL_SCANCODE_W])
       cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 0.0f, -1.0f)) * cameraSpeed * deltaTime;
@@ -197,9 +199,23 @@ int main(int argc, char **argv) {
     if (keys[SDL_SCANCODE_D])
       cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(-1.0f, 0.0f, 0.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_Q])
-      cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(0.0f, -1.0f, 0.0f)) * cameraSpeed * deltaTime;
+      cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 1.0f, 0.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_E])
-      cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, -1.0f, 0.0f)) * cameraSpeed * deltaTime;
+      cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 1.0f, 0.0f)) * cameraSpeed * deltaTime;
+    if (keys[SDL_SCANCODE_R])
+      roll = -0.02f;
+    if (keys[SDL_SCANCODE_F])
+      roll = 0.02f;
+    if (keys[SDL_SCANCODE_Z]) {
+      if (!nofocus) {
+        nofocus = true;
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+      }
+      else {
+        nofocus = false;
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+      }
+    }
     if (keys[SDL_SCANCODE_ESCAPE])
       break;
 
@@ -207,8 +223,8 @@ int main(int argc, char **argv) {
     mouseX = mouseY = 0;
     float yaw = 0.002f * mouseDelta.x;
     float pitch = 0.002f * mouseDelta.y;
-    float roll = 0.0f;
     glm::quat cameraOrient(glm::vec3(pitch, yaw, roll));
+    roll = 0.0;
     cameraQuat = cameraOrient * cameraQuat;
     cameraQuat = glm::normalize(cameraQuat);
     glm::mat4 rotate = glm::mat4_cast(cameraQuat);
@@ -247,7 +263,7 @@ int main(int argc, char **argv) {
     shaderOne.SetUniform("proj", proj);
 
     glBindVertexArray(vao);
-    for(int i = 0; i < cubePositions.size(); i++) {
+    for(unsigned int i = 0; i < cubePositions.size(); i++) {
       glm::mat4 model;
       model = glm::translate(model, cubePositions[i]);
       shaderOne.SetUniform("model", model);
@@ -273,6 +289,9 @@ int main(int argc, char **argv) {
       fpsFrames = 0;
       std::cout << "FPS: " << fpsCurrent << std::endl;
     }
+
+    lampShader.Reload();
+    shaderOne.Reload();
   }
   
   //Clean Up

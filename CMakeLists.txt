@@ -31,9 +31,10 @@ endif()
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(Boost COMPONENTS filesystem REQUIRED)
 pkg_search_module(SDL2 REQUIRED sdl2)
-set(INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/gli" "${CMAKE_SOURCE_DIR}/glm" ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-set(LIBRARIES ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+set(INCLUDE_DIRS ${Boost_INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/gli" "${CMAKE_SOURCE_DIR}/glm" ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+set(LIBRARIES ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES})
 
 set(RESOURCES "shaders/lamp.frag" "shaders/one.frag" "shaders/one.vert" "textures/fish.dds" "textures/container.dds")
 foreach(file ${RESOURCES})

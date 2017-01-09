@@ -2,10 +2,11 @@
 #define MATERIAL_H
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <map>
+#include <vector>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -16,10 +17,14 @@ public:
   GLuint Program;
 
   //constructor
-  Material(const std::string &vertexPath, const std::string &fragmentPath);
+  Material(const std::vector<std::string> &shaders);
 
   //destructor
   ~Material();
+
+  void AddShader(const std::string &shader);
+
+  void Reload();
 
   //use shader program
   void Use();
@@ -29,7 +34,9 @@ public:
   void SetUniform(const std::string &name, const glm::mat4 &mat);
 
 private:
-  void CompileShaders();
+  GLint CompileSrc(const boost::filesystem::path &p, GLenum type);
+  void LinkProgram();
+  void InitUniforms();
 
   struct Uniform {
     GLint location;
@@ -38,7 +45,14 @@ private:
 
   std::map<std::string, Uniform> Uniforms;
 
-  void InitUniforms();
+  struct ShaderSrc {
+    std::string fname;
+    unsigned int lastWrite = 0u;
+    GLenum type;
+    GLint id = 0u;
+  };
+
+  std::vector<ShaderSrc> Sources;
 };
 
 #endif

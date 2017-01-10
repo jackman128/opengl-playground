@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
 
   /*
   //init texture
+  std::cerr << "Shader failed to compile. Try again.\n";
   GLuint texture1 = CreateTexture(texture1Path.c_str());
   if (texture1 == 0)
     throw "GLI goof";
@@ -247,7 +248,6 @@ int main(int argc, char **argv) {
 
     shaderOne.SetUniform("viewPos", cameraPos);
 
-
     shaderOne.SetUniform("light.position", lightPos);
     shaderOne.SetUniform("light.ambient", glm::vec3(0.2));
     shaderOne.SetUniform("light.diffuse", glm::vec3(1.0));
@@ -289,9 +289,6 @@ int main(int argc, char **argv) {
       fpsFrames = 0;
       std::cout << "FPS: " << fpsCurrent << std::endl;
     }
-
-    lampShader.Reload();
-    shaderOne.Reload();
   }
   
   //Clean Up

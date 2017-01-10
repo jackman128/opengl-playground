@@ -6,9 +6,17 @@ layout (location = 1) in vec3 normal;
 out vec3 Normal;
 out vec3 FragPos;
 
-uniform mat4 model;
+struct Light {
+  vec3 position;
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+};
+
+uniform Light light;
 uniform mat4 view;
 uniform mat4 proj;
+uniform mat4 model;
 
 void main()
 {

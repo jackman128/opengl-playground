@@ -17,9 +17,9 @@ struct Light {
   vec3 specular;
 };
 
+uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
-uniform vec3 viewPos;
 
 void main()
 {
@@ -37,7 +37,7 @@ void main()
   vec3 reflectDir = reflect(-lightDir, norm);
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
   vec3 specular = light.specular * (spec * material.specular);
-
+  
 
   gl_FragColor = vec4((ambient + diffuse + specular), 1.0);
 }

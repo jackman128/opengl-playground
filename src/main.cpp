@@ -281,8 +281,8 @@ int main(int argc, char **argv) {
   }
 
     lampShader.Use();
-    glm::mat4 model = glm::translate(model, lightPos);
-    model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));
     lampShader.SetUniform("model", model);
     lampShader.SetUniform("view", view);
     lampShader.SetUniform("proj", proj);

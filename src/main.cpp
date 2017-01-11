@@ -21,55 +21,53 @@ GLuint CreateTexture(char const* Filename);
 
 const std::string vertexPath = "shaders/one.vert";
 const std::string fragmentPath = "shaders/one.frag";
-const std::string texture1Path = "textures/container.dds";
-const std::string texture2Path = "textures/fish.dds";
 const int windowWidth = 854;
 const int windowHeight = 480;
 const GLfloat cameraSpeed = 5.0f;
 
-const GLfloat vertices[] = {
-  //vertex                surface normal
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+GLfloat vertices[] = {
+        // Positions          // Normals           // Texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 };
 
 int main(int argc, char **argv) {
@@ -80,7 +78,7 @@ int main(int argc, char **argv) {
     std::cerr << "SDL init failed" << std::endl;
     return 0;
   }
-  
+
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
   GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -90,8 +88,9 @@ int main(int argc, char **argv) {
       glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
       glDebugMessageCallback(glDebugOutput, nullptr);
       glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+      std::cerr << "Debug context.\n";
     }
-  
+
   GLuint vbo, vao, lightVao;
   glGenBuffers(1, &vbo);
   glGenVertexArrays(1, &vao);
@@ -102,40 +101,57 @@ int main(int argc, char **argv) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   //position attrib
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(0);
 
   //surface normal attrib
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
 
+  //texcoord attrib
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(2);
+
   glBindVertexArray(0);
-  glEnableVertexAttribArray(0);
- 
+
   Material shaderOne({vertexPath, fragmentPath});
   Material lampShader({vertexPath, "shaders/lamp.frag"});
 
-  /*
   //init texture
-  std::cerr << "Shader failed to compile. Try again.\n";
-  GLuint texture1 = CreateTexture(texture1Path.c_str());
-  if (texture1 == 0)
-    throw "GLI goof";
+  GLuint texDiffuse = CreateTexture("../textures/container2.dds");
+  if (texDiffuse == 0)
+    std::cerr << "GLI goof";
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
   glBindTexture(GL_TEXTURE_2D, 0);
-  */
+
+  //init texture
+  GLuint texSpecular = CreateTexture("../textures/container2-specular.dds");
+  if (texSpecular == 0)
+    std::cerr << "GLI goof";
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_BACK);
-  //glEnable (GL_BLEND);
-  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //glEnable(GL_BLEND);
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glClearColor(0.0, 0.0, 0.0, 1.0);
+
+  
+
+  shaderOne.SetUniform("diffuse", 0);
+  shaderOne.SetUniform("specular", 1);
 
   std::vector<glm::vec3> cubePositions = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -238,42 +254,35 @@ int main(int argc, char **argv) {
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /*
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    glUniform1i(glGetUniformLocation(shaderOne.Program, "texture1"), 0);
-    */
-
     shaderOne.Use();
 
     shaderOne.SetUniform("viewPos", cameraPos);
 
     shaderOne.SetUniform("light.position", lightPos);
-    shaderOne.SetUniform("light.ambient", glm::vec3(0.2));
-    shaderOne.SetUniform("light.diffuse", glm::vec3(1.0));
-    shaderOne.SetUniform("light.specular", glm::vec3(1.0));
+    shaderOne.SetUniform("light.ambient", glm::vec3(sin(time / 1.8f) / 4.0f + 0.25f));
+    shaderOne.SetUniform("light.diffuse", glm::vec3(sin(time / 1.8f + 1.2f) / 2.0f + 1.0f));
+    shaderOne.SetUniform("light.specular", glm::vec3(sin(time / 1.8f + 2.4f) / 2.0f + 1.0f));
+    shaderOne.SetUniform("material.shininess", (float)sin(time / 4.0f + 0.5f) * 128.0f + 128.0f);
 
-    shaderOne.SetUniform("material.ambient", glm::vec3(0.0, 	0.1, 	0.06));
-    shaderOne.SetUniform("material.diffuse", glm::vec3(0.0, 	0.50980392, 	0.50980392));
-    shaderOne.SetUniform("material.specular", glm::vec3(0.50196078, 	0.50196078, 	0.50196078));
-    shaderOne.SetUniform("material.shininess", 0.25 * 128.0f);
-      
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texDiffuse);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texSpecular);
+
     glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
     shaderOne.SetUniform("view", view);
     shaderOne.SetUniform("proj", proj);
-
     glBindVertexArray(vao);
-    for(unsigned int i = 0; i < cubePositions.size(); i++) {
-      glm::mat4 model;
-      model = glm::translate(model, cubePositions[i]);
+    for (int i = 0; i < cubePositions.size(); i++) {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
       shaderOne.SetUniform("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+  }
 
     lampShader.Use();
-    glm::mat4 model;
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f));
+    glm::mat4 model = glm::translate(model, lightPos);
+    model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     lampShader.SetUniform("model", model);
     lampShader.SetUniform("view", view);
     lampShader.SetUniform("proj", proj);

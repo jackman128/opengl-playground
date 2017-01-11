@@ -148,22 +148,17 @@ void Material::InitUniforms() {
 }
 
 void Material::SetUniform(const std::string &name, float v0){
-  if (Uniforms[name].type != GL_FLOAT)
-    std::cerr << name << "Invalid uniform type not a GL_FLOAT\n";
-  else
     glProgramUniform1f(this->Program, Uniforms[name].location, v0);
 }
 
 void Material::SetUniform(const std::string &name, const glm::vec3 &vec) {
-  if (Uniforms[name].type != GL_FLOAT_VEC3)
-    std::cerr << name << "Invalid uniform type not a GL_FLOAT_VEC3\n";
-  else
     glProgramUniform3f(this->Program, Uniforms[name].location, vec.x, vec.y, vec.z);
 }
 
 void Material::SetUniform(const std::string &name, const glm::mat4 &mat) {
-  if (Uniforms[name].type != GL_FLOAT_MAT4)
-    std::cerr << name << "Invalid uniform type not a GL_FLOAT_MAT4\n";
-  else
     glProgramUniformMatrix4fv(this->Program, Uniforms[name].location, 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Material::SetUniform(const std::string &name, int v0) {
+  glProgramUniform1i(this->Program, Uniforms[name].location, v0);
 }

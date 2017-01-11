@@ -36,7 +36,7 @@ pkg_search_module(SDL2 REQUIRED sdl2)
 set(INCLUDE_DIRS ${Boost_INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/gli" "${CMAKE_SOURCE_DIR}/glm" ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
 set(LIBRARIES ${SDL2_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES})
 
-set(RESOURCES "shaders/lamp.frag" "shaders/one.frag" "shaders/one.vert" "textures/fish.dds" "textures/container.dds")
+set(RESOURCES "shaders/lamp.frag" "shaders/one.frag" "shaders/one.vert" "textures/fish-specular.dds" "textures/container2.dds" "textures/fish.dds" "textures/container.dds")
 foreach(file ${RESOURCES})
   configure_file(${CMAKE_SOURCE_DIR}/${file} ${CMAKE_BINARY_DIR}/${file} COPYONLY)
 endforeach(file)

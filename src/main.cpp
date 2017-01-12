@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   Material lampShader({vertexPath, "shaders/lamp.frag"});
 
   //init texture
-  GLuint texDiffuse = CreateTexture("../textures/container2.dds");
+  GLuint texDiffuse = CreateTexture("../textures/fish.dds");
   if (texDiffuse == 0)
     std::cerr << "GLI goof";
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
   glBindTexture(GL_TEXTURE_2D, 0);
 
   //init texture
-  GLuint texSpecular = CreateTexture("../textures/container2-specular.dds");
+  GLuint texSpecular = CreateTexture("../textures/fish-specular.dds");
   if (texSpecular == 0)
     std::cerr << "GLI goof";
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -146,8 +146,8 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-
+  glClearColor(0.3, 0.3, 0.3, 1.0);
+  glEnable(GL_FRAMEBUFFER_SRGB);
   
 
   shaderOne.SetUniform("diffuse", 0);
@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     glm::vec3( 1.5f,  0.2f, -1.5f),
     glm::vec3(-1.3f,  1.0f, -1.5f)
   };
-  glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
+  glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
   glm::quat cameraQuat;
 
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
-    lightPos.x = sin(time) * 5;
+    lightPos.x = sin(time) * 2.0f;
 
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -259,10 +259,13 @@ int main(int argc, char **argv) {
     shaderOne.SetUniform("viewPos", cameraPos);
 
     shaderOne.SetUniform("light.position", lightPos);
-    shaderOne.SetUniform("light.ambient", glm::vec3(sin(time / 1.8f) / 4.0f + 0.25f));
-    shaderOne.SetUniform("light.diffuse", glm::vec3(sin(time / 1.8f + 1.2f) / 2.0f + 1.0f));
-    shaderOne.SetUniform("light.specular", glm::vec3(sin(time / 1.8f + 2.4f) / 2.0f + 1.0f));
-    shaderOne.SetUniform("material.shininess", (float)sin(time / 4.0f + 0.5f) * 128.0f + 128.0f);
+    shaderOne.SetUniform("light.ambient", glm::vec3(0.2f));
+    shaderOne.SetUniform("light.diffuse", glm::vec3(2.0f));
+    shaderOne.SetUniform("light.specular", glm::vec3(2.5f));
+    shaderOne.SetUniform("light.constant", 1.0f);
+    shaderOne.SetUniform("light.linear", 0.45f);
+    shaderOne.SetUniform("light.quadratic", 0.0075f);
+      shaderOne.SetUniform("material.shininess", 32.0f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);

@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   Material lampShader({vertexPath, "shaders/lamp.frag"});
 
   //init texture
-  GLuint texDiffuse = CreateTexture("../textures/fish.dds");
+  GLuint texDiffuse = CreateTexture("../textures/container2.dds");
   if (texDiffuse == 0)
     std::cerr << "GLI goof";
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
   glBindTexture(GL_TEXTURE_2D, 0);
 
   //init texture
-  GLuint texSpecular = CreateTexture("../textures/fish-specular.dds");
+  GLuint texSpecular = CreateTexture("../textures/container2-specular.dds");
   if (texSpecular == 0)
     std::cerr << "GLI goof";
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -146,9 +146,9 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.3, 0.3, 0.3, 1.0);
+  glClearColor(0.4, 0.4, 0.6, 1.0);
   glEnable(GL_FRAMEBUFFER_SRGB);
-  
+
 
   shaderOne.SetUniform("diffuse", 0);
   shaderOne.SetUniform("specular", 1);
@@ -165,7 +165,14 @@ int main(int argc, char **argv) {
     glm::vec3( 1.5f,  0.2f, -1.5f),
     glm::vec3(-1.3f,  1.0f, -1.5f)
   };
-  glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+  std::vector<glm::vec3> lightPositions = {
+    glm::vec3( 0.7f,  0.2f,  2.0f),
+    glm::vec3( 2.3f, -3.3f, -4.0f),
+    glm::vec3(-4.0f,  2.0f, -12.0f),
+    glm::vec3( 0.0f,  0.0f, -3.0f)
+  };
+
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
   glm::quat cameraQuat;
 
@@ -242,8 +249,6 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
-    lightPos.x = sin(time) * 2.0f;
-
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -251,14 +256,24 @@ int main(int argc, char **argv) {
 
     shaderOne.SetUniform("viewPos", cameraPos);
 
-    shaderOne.SetUniform("light.position", lightPos);
-    shaderOne.SetUniform("light.ambient", glm::vec3(0.2f));
-    shaderOne.SetUniform("light.diffuse", glm::vec3(2.0f));
-    shaderOne.SetUniform("light.specular", glm::vec3(2.5f));
-    shaderOne.SetUniform("light.constant", 1.0f);
-    shaderOne.SetUniform("light.linear", 0.45f);
-    shaderOne.SetUniform("light.quadratic", 0.0075f);
-    shaderOne.SetUniform("material.shininess", 32.0f);
+    for (int i = 0; i < lightPositions.size(); i++) {
+      using namespace std;
+      std::string p1 = "pointLights[";
+      std::string p2 = to_string(i);
+      shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
+      shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
+      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(2.5f));
+      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(3.0f));
+      shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
+      shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
+      shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
+    }
+    shaderOne.SetUniform("material.shininess", 50.0f);
+
+    shaderOne.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    shaderOne.SetUniform("dirLight.ambient", glm::vec3(0.05f));
+    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(1.8f));
+    shaderOne.SetUniform("dirLight.specular", glm::vec3(2.0f));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);
@@ -272,17 +287,20 @@ int main(int argc, char **argv) {
     glBindVertexArray(vao);
     for (int i = 0; i < cubePositions.size(); i++) {
       glm::mat4 model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
+      model = glm::rotate(model, 15.0f * i, glm::vec3(1.0f, 0.5f, 0.5f));
       shaderOne.SetUniform("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
     lampShader.Use();
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), lightPos);
-    model = glm::scale(model, glm::vec3(0.2f));
-    lampShader.SetUniform("model", model);
-    lampShader.SetUniform("view", view);
-    lampShader.SetUniform("proj", proj);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (unsigned int i = 0; i < lightPositions.size(); i++) {
+      glm::mat4 model = glm::translate(glm::mat4(1.0f), lightPositions[i]);
+      model = glm::scale(model, glm::vec3(0.2f));
+      lampShader.SetUniform("model", model);
+      lampShader.SetUniform("view", view);
+      lampShader.SetUniform("proj", proj);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
     glBindVertexArray(0);
 
     SDL_GL_SwapWindow(window);
@@ -295,7 +313,7 @@ int main(int argc, char **argv) {
       std::cout << "FPS: " << fpsCurrent << std::endl;
     }
   }
-  
+
   //Clean Up
   glDeleteVertexArrays(1, &vao);
   glDeleteBuffers(1, &vbo);

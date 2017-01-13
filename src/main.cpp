@@ -205,7 +205,6 @@ int main(int argc, char **argv) {
     GLfloat time = SDL_GetTicks() / 1000.0f;
     deltaTime = time - lastFrame;
     lastFrame = time;
-    float roll;
     //do movement
     if (keys[SDL_SCANCODE_W])
       cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 0.0f, -1.0f)) * cameraSpeed * deltaTime;
@@ -216,13 +215,9 @@ int main(int argc, char **argv) {
     if (keys[SDL_SCANCODE_D])
       cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(-1.0f, 0.0f, 0.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_Q])
-      cameraPos -= (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 1.0f, 0.0f)) * cameraSpeed * deltaTime;
+      cameraPos.y -= cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_E])
-      cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 1.0f, 0.0f)) * cameraSpeed * deltaTime;
-    if (keys[SDL_SCANCODE_R])
-      roll = -0.02f;
-    if (keys[SDL_SCANCODE_F])
-      roll = 0.02f;
+      cameraPos.y += cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_Z]) {
       if (!nofocus) {
         nofocus = true;
@@ -237,12 +232,10 @@ int main(int argc, char **argv) {
       break;
 
     glm::vec2 mouseDelta(mouseX, mouseY);
+    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseDelta.y * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseDelta.x * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
     mouseX = mouseY = 0;
-    float yaw = 0.002f * mouseDelta.x;
-    float pitch = 0.002f * mouseDelta.y;
-    glm::quat cameraOrient(glm::vec3(pitch, yaw, roll));
-    roll = 0.0;
-    cameraQuat = cameraOrient * cameraQuat;
+    cameraQuat = deltaPitch * cameraQuat * deltaYaw;
     cameraQuat = glm::normalize(cameraQuat);
     glm::mat4 rotate = glm::mat4_cast(cameraQuat);
     glm::mat4 translate(1.0f);
@@ -265,7 +258,7 @@ int main(int argc, char **argv) {
     shaderOne.SetUniform("light.constant", 1.0f);
     shaderOne.SetUniform("light.linear", 0.45f);
     shaderOne.SetUniform("light.quadratic", 0.0075f);
-      shaderOne.SetUniform("material.shininess", 32.0f);
+    shaderOne.SetUniform("material.shininess", 32.0f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);

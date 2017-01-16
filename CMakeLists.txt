@@ -28,7 +28,9 @@ set(LIBRARIES ${SDL2_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES} ${OPENGL_LI
 file(GLOB_RECURSE resources shaders/* textures/*)
 file(GLOB_RECURSE sources src/*.cpp src/*.h SOIL2/src/SOIL2/*.c SOIL2/src/SOIL2/*.h)
 
-file(COPY ${resources} DESTINATION resources)
+foreach(resource ${resources})
+  configure_file(${resource} resources COPYONLY)
+endforeach(resource)
 
 add_executable(main ${sources} ${resources})
 target_link_libraries(main ${LIBRARIES})

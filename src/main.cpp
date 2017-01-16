@@ -19,10 +19,12 @@
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
 
-const std::string vertexPath = "shaders/one.vert";
-const std::string fragmentPath = "shaders/one.frag";
-const int windowWidth = 854;
-const int windowHeight = 480;
+const std::string vertexPath = "resources/one.vert";
+const std::string fragmentPath = "resources/one.frag";
+const std::string diffusePath = "resources/fish.dds";
+const std::string specularPath = "resources/fish-specular.dds";
+const int windowWidth = 800;
+const int windowHeight = 600;
 const GLfloat cameraSpeed = 5.0f;
 
 GLfloat vertices[] = {
@@ -115,33 +117,35 @@ int main(int argc, char **argv) {
   glBindVertexArray(0);
 
   Material shaderOne({vertexPath, fragmentPath});
-  Material lampShader({vertexPath, "shaders/lamp.frag"});
+  Material lampShader({vertexPath, "resources/lamp.frag"});
 
   //init texture
-  GLuint texDiffuse = SOIL_load_OGL_texture("textures/fish.dds",
-                                            SOIL_LOAD_RGB,
+  GLuint texDiffuse = SOIL_load_OGL_texture(diffusePath.c_str(),
+                                            SOIL_LOAD_AUTO,
                                             SOIL_CREATE_NEW_ID,
                                             SOIL_FLAG_DDS_LOAD_DIRECT | SOIL_FLAG_SRGB_COLOR_SPACE);
   if (texDiffuse == 0)
-    std::cerr << "SOIL2 goof";
+    std::cerr << "SOIL2 goof" << __LINE__;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   //init texture
-  GLuint texSpecular = SOIL_load_OGL_texture("textures/fish-specular.dds",
-                                             SOIL_LOAD_L,
+  GLuint texSpecular = SOIL_load_OGL_texture(specularPath.c_str(),
+                                             SOIL_LOAD_AUTO,
                                              SOIL_CREATE_NEW_ID,
                                              SOIL_FLAG_DDS_LOAD_DIRECT);
   if (texSpecular == 0)
-    std::cerr << "SOIL2 goof";
+    std::cerr << "SOIL2 goof" << __LINE__;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_MULTISAMPLE);
@@ -266,18 +270,18 @@ int main(int argc, char **argv) {
       std::string p2 = to_string(i);
       shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
       shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
-      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(2.5f));
-      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(3.0f));
+      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(1.5f));
+      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(2.0f));
       shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
       shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
       shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
     }
-    shaderOne.SetUniform("material.shininess", 50.0f);
+    shaderOne.SetUniform("material.shininess", 32.0f);
 
     shaderOne.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     shaderOne.SetUniform("dirLight.ambient", glm::vec3(0.05f));
-    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(1.8f));
-    shaderOne.SetUniform("dirLight.specular", glm::vec3(2.0f));
+    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(0.8f));
+    shaderOne.SetUniform("dirLight.specular", glm::vec3(1.0f));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);

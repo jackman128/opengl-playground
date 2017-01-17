@@ -154,8 +154,8 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.4, 0.4, 0.6, 1.0);
-  glEnable(GL_FRAMEBUFFER_SRGB);
+  glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+  //glEnable(GL_FRAMEBUFFER_SRGB);
 
 
   shaderOne.SetUniform("diffuse", 0);
@@ -257,6 +257,15 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
+    for (unsigned int i = 0; i < lightPositions.size(); i++) {
+      if (i % 2) {
+        lightPositions[i].x = sin(time) / 2.0f;
+      }
+      else {
+        lightPositions[i].y = sin(time) / 2.5f;
+      }
+    }
+
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -270,8 +279,8 @@ int main(int argc, char **argv) {
       std::string p2 = to_string(i);
       shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
       shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
-      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(1.5f));
-      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(2.0f));
+      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(0.8f));
+      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(1.0f));
       shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
       shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
       shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
@@ -280,8 +289,8 @@ int main(int argc, char **argv) {
 
     shaderOne.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     shaderOne.SetUniform("dirLight.ambient", glm::vec3(0.05f));
-    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(0.8f));
-    shaderOne.SetUniform("dirLight.specular", glm::vec3(1.0f));
+    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(0.2f));
+    shaderOne.SetUniform("dirLight.specular", glm::vec3(0.7f));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);

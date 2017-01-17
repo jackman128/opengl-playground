@@ -76,7 +76,8 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
   vec3 reflectDir = reflect(lightDir, normal);
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
   float distance = length(light.position - fragPos);
-  float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * pow(distance, 2.0));
+  //float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * pow(distance, 2.0));
+  float attenuation = 1.0 / distance;
 
   vec3 ambient = light.ambient * texture(diffuse, TexCoords).rgb;
   vec3 diffuse = light.diffuse * diff * texture(diffuse, TexCoords).rgb;

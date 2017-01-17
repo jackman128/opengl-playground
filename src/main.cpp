@@ -1,5 +1,6 @@
 #define GLEW_STATIC
 #define GLM_ENABLE_EXPERIMENTAL
+//#define GLM_FORCE_RADIANS
 #include <iostream>
 #include <fstream>
 #include <exception>
@@ -25,7 +26,7 @@ const std::string diffusePath = "resources/fish.dds";
 const std::string specularPath = "resources/fish-specular.dds";
 const int windowWidth = 800;
 const int windowHeight = 600;
-const GLfloat cameraSpeed = 5.0f;
+const GLfloat cameraSpeed = 3.0f;
 
 GLfloat vertices[] = {
         // Positions          // Normals           // Texture Coords
@@ -154,8 +155,8 @@ int main(int argc, char **argv) {
   //glCullFace(GL_BACK);
   //glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
   //glEnable(GL_FRAMEBUFFER_SRGB);
+  glClearColor(0.2, 0.2, 0.25, 1.0);
 
 
   shaderOne.SetUniform("diffuse", 0);
@@ -280,17 +281,33 @@ int main(int argc, char **argv) {
       shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
       shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
       shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(0.8f));
-      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(1.0f));
+      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(0.8f));
       shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
       shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
       shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
     }
-    shaderOne.SetUniform("material.shininess", 32.0f);
+    shaderOne.SetUniform("material.shininess", 128.0f);
 
     shaderOne.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
     shaderOne.SetUniform("dirLight.ambient", glm::vec3(0.05f));
     shaderOne.SetUniform("dirLight.diffuse", glm::vec3(0.2f));
     shaderOne.SetUniform("dirLight.specular", glm::vec3(0.7f));
+
+    glm::vec3 camFront = glm::eulerAngles(cameraQuat);
+    float z = -(cos(camFront.x) * cos(camFront.y));
+    float y = -(sin(camFront.x) * cos(camFront.y));
+    float x = sin(camFront.y);
+    shaderOne.SetUniform("spotLight.position", cameraPos);
+    shaderOne.SetUniform("spotLight.direction", glm::vec3(x, y, z));
+    shaderOne.SetUniform("spotLight.innerCutOff", glm::cos(glm::radians(12.5f)));
+    shaderOne.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    shaderOne.SetUniform("spotLight.ambient", glm::vec3(0.1f));
+    shaderOne.SetUniform("spotLight.diffuse", glm::vec3(0.7f, 0.7f, 0.5f));
+    shaderOne.SetUniform("spotLight.specular", glm::vec3(0.7f));
+    shaderOne.SetUniform("spotLight.constant", 1.0f);
+    shaderOne.SetUniform("spotLight.linear", 0.09f);
+    shaderOne.SetUniform("spotLight.quadratic", 0.032f);
+
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texDiffuse);

@@ -25,14 +25,14 @@ pkg_search_module(SDL2 REQUIRED sdl2)
 set(INCLUDE_DIRS ${Boost_INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/SOIL2/src/SOIL2" "${CMAKE_SOURCE_DIR}/glm" ${SDL2_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS})
 set(LIBRARIES ${SDL2_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES} ${OPENGL_LIBRARIES})
 
-file(GLOB_RECURSE resources shaders/* textures/*)
+file(GLOB_RECURSE resources resources/*)
 file(GLOB_RECURSE sources src/*.cpp src/*.h SOIL2/src/SOIL2/*.c SOIL2/src/SOIL2/*.h)
 
 foreach(resource ${resources})
-  configure_file(${resource} resources COPYONLY)
+  configure_file(${resource} resources/ COPYONLY)
 endforeach(resource)
 
-add_executable(main ${sources} ${resources})
+add_executable(main ${sources})
 target_link_libraries(main ${LIBRARIES})
 target_include_directories(main PUBLIC ${INCLUDE_DIRS})
 cotire(main)

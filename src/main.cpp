@@ -20,12 +20,13 @@
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
 
-const std::string vertexPath = "resources/one.vert";
-const std::string fragmentPath = "resources/one.frag";
-const std::string diffusePath = "resources/fish.dds";
-const std::string specularPath = "resources/fish-specular.dds";
-const int windowWidth = 800;
-const int windowHeight = 600;
+const std::string vertexPath = "resources/shaders/one.vert";
+const std::string fragmentPath = "resources/shaders/one.frag";
+const std::string lampShaderPath = "resources/shaders/lamp.frag";
+const std::string diffusePath = "resources/textures/fish.dds";
+const std::string specularPath = "resources/textures/fish-specular.dds";
+const int windowWidth = 1920;
+const int windowHeight = 1080;
 const GLfloat cameraSpeed = 3.0f;
 
 GLfloat vertices[] = {
@@ -118,7 +119,7 @@ int main(int argc, char **argv) {
   glBindVertexArray(0);
 
   Material shaderOne({vertexPath, fragmentPath});
-  Material lampShader({vertexPath, "resources/lamp.frag"});
+  Material lampShader({vertexPath, lampShaderPath});
 
   //init texture
   GLuint texDiffuse = SOIL_load_OGL_texture(diffusePath.c_str(),
@@ -131,7 +132,7 @@ int main(int argc, char **argv) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   //init texture
@@ -145,11 +146,11 @@ int main(int argc, char **argv) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glEnable(GL_MULTISAMPLE);
+  //glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_BACK);
@@ -373,8 +374,8 @@ bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
     window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);

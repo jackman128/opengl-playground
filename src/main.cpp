@@ -196,6 +196,7 @@ int main(int argc, char **argv) {
   GLfloat fov = 45.0f;
   int mouseX, mouseY;
   bool nofocus = false;
+  bool drawWireframe = false;
   mouseX = mouseY = 0;
 
   std::vector<bool> keys(256, false);
@@ -245,6 +246,8 @@ int main(int argc, char **argv) {
         SDL_SetRelativeMouseMode(SDL_TRUE);
       }
     }
+    if (keys[SDL_SCANCODE_P])
+      drawWireframe = !drawWireframe;
     if (keys[SDL_SCANCODE_ESCAPE])
       break;
 
@@ -261,10 +264,10 @@ int main(int argc, char **argv) {
 
     for (unsigned int i = 0; i < lightPositions.size(); i++) {
       if (i % 2) {
-        lightPositions[i].x = sin(time) / 2.0f;
+        lightPositions[i].x = sin(time) / 1.5f;
       }
       else {
-        lightPositions[i].y = sin(time) / 2.5f;
+        lightPositions[i].y = sin(time * 1.2f) / 1.5f;
       }
     }
 
@@ -282,7 +285,7 @@ int main(int argc, char **argv) {
       shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
       shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
       shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(0.8f));
-      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(0.8f));
+      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(1.2f));
       shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
       shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
       shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
@@ -315,6 +318,12 @@ int main(int argc, char **argv) {
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texSpecular);
+    if (drawWireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
     shaderOne.SetUniform("view", view);

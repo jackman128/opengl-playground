@@ -14,8 +14,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <SOIL2.h>
+#include <boost/log/trivial.hpp>
 #include "context.hpp"
 #include "Material.hpp"
+
+#define LFC1_LOG_TRACE(logger) \
+  BOOST_LOG_SEV(logger, trivial::trace) << "(" << __FILE__ << ", " << __LINE__ << ")"
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
@@ -278,7 +282,7 @@ int main(int argc, char **argv) {
 
     shaderOne.SetUniform("viewPos", cameraPos);
 
-    for (int i = 0; i < lightPositions.size(); i++) {
+    for (unsigned int i = 0; i < lightPositions.size(); i++) {
       using namespace std;
       std::string p1 = "pointLights[";
       std::string p2 = to_string(i);
@@ -329,7 +333,7 @@ int main(int argc, char **argv) {
     shaderOne.SetUniform("view", view);
     shaderOne.SetUniform("proj", proj);
     glBindVertexArray(vao);
-    for (int i = 0; i < cubePositions.size(); i++) {
+    for (unsigned int i = 0; i < cubePositions.size(); i++) {
       glm::mat4 model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
       model = glm::rotate(model, 15.0f * i, glm::vec3(1.0f, 0.5f, 0.5f));
       shaderOne.SetUniform("model", model);
@@ -372,6 +376,7 @@ int main(int argc, char **argv) {
 bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cout << "SDL goofed: " << SDL_GetError() << std::endl;
+    LFC1_LOG_TRACE() << "SDL Goofed: " << SDL_GetError();
     return false;
   }
   else {
@@ -386,7 +391,7 @@ bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
-    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    window = SDL_CreateWindow("OpenGL Playground", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (window == NULL) {
       std::cout << "window goof" << std::endl;

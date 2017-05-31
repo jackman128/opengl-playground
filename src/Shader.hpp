@@ -1,9 +1,8 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#pragma once
 
 #include <string>
-#include <map>
 #include <vector>
+#include <map>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -11,16 +10,16 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-class Material {
+class Shader {
 public:
   //GL program ID
   GLuint Program;
 
   //constructor
-  Material(const std::vector<std::string> &shaders);
+  Shader(const std::vector<std::string> &shaders);
 
   //destructor
-  ~Material();
+  ~Shader();
 
   void AddShader(const std::string &shader);
 
@@ -33,6 +32,7 @@ public:
   void SetUniform(const std::string &name, const glm::vec3 &vec);
   void SetUniform(const std::string &name, const glm::mat4 &mat);
   void SetUniform(const std::string &name, int v0);
+  void SetUniform(const std::string &name, unsigned int v0);
 
 private:
   GLint CompileSrc(const boost::filesystem::path &p, GLenum type);
@@ -40,7 +40,7 @@ private:
   void InitUniforms();
 
   struct Uniform {
-    GLint location;
+    GLint location = -1;
     GLenum type;
   };
 
@@ -56,4 +56,3 @@ private:
   std::vector<ShaderSrc> Sources;
 };
 
-#endif

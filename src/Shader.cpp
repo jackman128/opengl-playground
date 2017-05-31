@@ -1,12 +1,10 @@
-#include "Material.hpp"
+#include "Shader.hpp"
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace boost::filesystem;
 
-
-
-Material::Material(const std::vector<std::string> &fnames) {
+Shader::Shader(const std::vector<std::string> &fnames) {
   for (std::string fname : fnames) {
     ShaderSrc src;
     path p(fname);
@@ -36,18 +34,18 @@ Material::Material(const std::vector<std::string> &fnames) {
   Reload();
 }
 
-Material::~Material() {
+Shader::~Shader() {
   for (ShaderSrc shader : Sources) {
     glDeleteShader(shader.id);
   }
   glDeleteProgram(this->Program);
 }
 
-void Material::Use() {
+void Shader::Use() {
   glUseProgram(this->Program);
 }
 
-GLint Material::CompileSrc(const path &p, GLenum type) {
+GLint Shader::CompileSrc(const path &p, GLenum type) {
   size_t fsize = file_size(p);
   char *buffer = new char[(fsize > 512) ? fsize : 512];
 
@@ -68,14 +66,16 @@ GLint Material::CompileSrc(const path &p, GLenum type) {
     GLint length = 0;
     glGetShaderInfoLog(shaderId, 512, &length, buffer);
     std::cerr.write(buffer, length);
+    delete buffer;
     return 0;
   }
   else {
+    delete buffer;
     return shaderId;
   }
 }
 
-void Material::Reload() {
+void Shader::Reload() {
   std::stack<ShaderSrc*> newShaders;
   bool relink = false;
   GLint newProgram = 0;
@@ -130,7 +130,7 @@ void Material::Reload() {
   }
 }
 
-void Material::InitUniforms() {
+void Shader::InitUniforms() {
   Uniforms.clear();
   GLint numUniforms, length;
   GLchar buffer[256];
@@ -147,18 +147,22 @@ void Material::InitUniforms() {
   }
 }
 
-void Material::SetUniform(const std::string &name, float v0){
+void Shader::SetUniform(const std::string &name, float v0){
     glProgramUniform1f(this->Program, Uniforms[name].location, v0);
 }
 
-void Material::SetUniform(const std::string &name, const glm::vec3 &vec) {
+void Shader::SetUniform(const std::string &name, const glm::vec3 &vec) {
     glProgramUniform3f(this->Program, Uniforms[name].location, vec.x, vec.y, vec.z);
 }
 
-void Material::SetUniform(const std::string &name, const glm::mat4 &mat) {
+void Shader::SetUniform(const std::string &name, const glm::mat4 &mat) {
     glProgramUniformMatrix4fv(this->Program, Uniforms[name].location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Material::SetUniform(const std::string &name, int v0) {
+void Shader::SetUniform(const std::string &name, int v0) {
   glProgramUniform1i(this->Program, Uniforms[name].location, v0);
+}
+
+void Shader::SetUniform(const std::string &name, unsigned int v0) {
+  glProgramUniform1ui(this->Program, Uniforms[name].location, v0);
 }

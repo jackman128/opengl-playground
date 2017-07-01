@@ -25,23 +25,20 @@ const std::string fragmentPath = "resources/one.frag";
 const int windowWidth = 1920;
 const int windowHeight = 1080;
 const GLfloat cameraSpeed = 3.0f;
-const GLfloat cameraRotSpeed = 0.08f;
-const GLfloat nearClip = 0.1f;
-const GLfloat farClip = 100.0f;
+
 
 int main(int argc, char **argv) {
   glewExperimental = GL_TRUE;
   SDL_Window* window = NULL;
   SDL_GLContext context = NULL;
   if (!initSDL(window, context)) {
-    cerr << "SDL init failed" << std::endl;
+    std::cerr << "SDL init failed" << std::endl;
     return 0;
   }
 
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
-  GLint flags;
-  glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+  GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
       glEnable(GL_DEBUG_OUTPUT);
@@ -54,6 +51,7 @@ int main(int argc, char **argv) {
   Shader shaderOne({vertexPath, fragmentPath});
   Model myModel("resources/wt_teapot.obj");
 
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -63,8 +61,18 @@ int main(int argc, char **argv) {
   glEnable(GL_FRAMEBUFFER_SRGB);
   glClearColor(0.2, 0.2, 0.25, 1.0);
 
+
   glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
   glm::quat cameraQuat;
+
+  std::vector<glm::vec3> lightPositions = {
+    glm::vec3( 0.7f,  0.2f,  2.0f),
+    glm::vec3( 2.3f, -3.3f, -4.0f),
+    glm::vec3(-4.0f,  2.0f, -12.0f),
+    glm::vec3( 0.0f,  0.0f, -3.0f)
+  };
+
+  SDL_Event windowEvent;
 
   unsigned int fpsLast = SDL_GetTicks();
   unsigned int fpsCurrent;
@@ -74,62 +82,34 @@ int main(int argc, char **argv) {
   GLfloat fov = 45.0f;
   int mouseX, mouseY;
   bool nofocus = false;
-  bool wireframe = false;
   mouseX = mouseY = 0;
-  const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
-  bool quit = false;
-  while (!quit) {
+  std::vector<bool> keys(256, false);
+
+  while (1) {
     //events
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-      switch(e.type) {
-      case SDL_QUIT:
-        quit = true;
-        break;
-      case SDL_KEYDOWN:
-        switch (e.key.keysym.scancode) {
-        case SDL_SCANCODE_X:
-          wireframe = !wireframe;
-          if (wireframe) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glDisable(GL_CULL_FACE);
-          }
-          else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glEnable(GL_CULL_FACE);
-          }
-          break;
-        case SDL_SCANCODE_Z:
-          if (!nofocus) {
-            nofocus = true;
-            SDL_SetRelativeMouseMode(SDL_FALSE);
-          }
-          else {
-            nofocus = false;
-            SDL_SetRelativeMouseMode(SDL_TRUE);
-          }
-          break;
-          if (keys[SDL_SCANCODE_ESCAPE])
-            quit = true;
-          break;
-        case SDL_SCANCODE_ESCAPE:
-          quit = true;
-          break;
-        }
-        break;
-      case SDL_KEYUP:
-        break;
-      case SDL_MOUSEMOTION:
+    while (SDL_PollEvent(&windowEvent)) {
+      if (windowEvent.type == SDL_QUIT) break;
+      else if (windowEvent.type == SDL_KEYDOWN) {
+        keys[windowEvent.key.keysym.scancode] = true;
+      }
+      else if (windowEvent.type == SDL_KEYUP) {
+        keys[windowEvent.key.keysym.scancode] = false;
+      }
+      else if (windowEvent.type == SDL_MOUSEMOTION) {
         if (!nofocus) {
-          mouseX = e.motion.xrel;
-          mouseY = e.motion.yrel;
+          mouseX = windowEvent.motion.xrel;
+          mouseY = windowEvent.motion.yrel;
         }
-        break;
-      default:
-        break;
       }
     }
+
+    //update
+    GLfloat time = SDL_GetTicks() / 1000.0f;
+    deltaTime = time - lastFrame;
+    lastFrame = time;
+
+    //do movement
     if (keys[SDL_SCANCODE_W])
       cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 0.0f, -1.0f)) * cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_S])
@@ -142,17 +122,23 @@ int main(int argc, char **argv) {
       cameraPos.y -= cameraSpeed * deltaTime;
     if (keys[SDL_SCANCODE_E])
       cameraPos.y += cameraSpeed * deltaTime;
-
-    //update
-    double time = SDL_GetTicks() / 1000.0;
-    deltaTime = time - lastFrame;
-    lastFrame = time;
-    cout << "dtime: " << deltaTime * 1000.0 << endl;
+    if (keys[SDL_SCANCODE_Z]) {
+      if (!nofocus) {
+        nofocus = true;
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+      }
+      else {
+        nofocus = false;
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+      }
+    }
+    if (keys[SDL_SCANCODE_ESCAPE])
+      break;
 
     //update camera
     glm::vec2 mouseDelta(mouseX, mouseY);
-    glm::quat deltaPitch = glm::angleAxis(cameraRotSpeed * mouseDelta.y * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::quat deltaYaw = glm::angleAxis(cameraRotSpeed * mouseDelta.x * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseDelta.y * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseDelta.x * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
     mouseX = mouseY = 0;
     cameraQuat = deltaPitch * cameraQuat * deltaYaw;
     cameraQuat = glm::normalize(cameraQuat);
@@ -180,12 +166,12 @@ int main(int argc, char **argv) {
 
     shaderOne.SetUniform("dirLight.direction", glm::vec3(0.2f, 1.0f, 0.3f));
 
-    glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, nearClip, farClip);
+    glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
     shaderOne.SetUniform("proj", proj);
 
     glm::mat4 model;
-    model = glm::translate(model, glm::vec3(-1.0f));
-    model = glm::scale(model, glm::vec3(1.2f));
+    model = glm::translate(model, glm::vec3(sin(time)*1.5f, -1.75f, cos(time)*1.5f));
+    model = glm::scale(model, glm::vec3(1.2f, 1.2f, 1.2f));
     shaderOne.SetUniform("model", model);
 
     //render
@@ -193,20 +179,16 @@ int main(int argc, char **argv) {
 
     shaderOne.Use();
     myModel.Draw(shaderOne);
-    glFinish();
 
     SDL_GL_SwapWindow(window);
 
-    /*
     fpsFrames++;
-    if (fpsLast < SDL_GetTicks() - 1000.0f) {
+    if (fpsLast < SDL_GetTicks() - 1.0f * 1000) {
       fpsLast = SDL_GetTicks();
       fpsCurrent = fpsFrames;
       fpsFrames = 0;
       std::cout << "FPS: " << fpsCurrent << std::endl;
     }
-    */
-
   }
 
   //Clean Up
@@ -233,7 +215,7 @@ bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
     window = SDL_CreateWindow("OpenGL Playground", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);

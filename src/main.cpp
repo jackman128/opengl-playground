@@ -14,9 +14,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <SOIL2.h>
-#include <boost/log/trivial.hpp>
 #include "context.hpp"
-#include "Material.hpp"
+#include "Shader.hpp"
+#include "Model.hpp"
+
+using namespace std;
 
 #define LFC1_LOG_TRACE(logger) \
   BOOST_LOG_SEV(logger, trivial::trace) << "(" << __FILE__ << ", " << __LINE__ << ")"
@@ -24,59 +26,12 @@
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
 
-const std::string vertexPath = "resources/shaders/one.vert";
-const std::string fragmentPath = "resources/shaders/one.frag";
-const std::string lampShaderPath = "resources/shaders/lamp.frag";
-const std::string diffusePath = "resources/textures/fish.dds";
-const std::string specularPath = "resources/textures/fish-specular.dds";
-const int windowWidth = 1920;
-const int windowHeight = 1080;
+const string vertexPath = "resources/shaders/one.vert";
+const string fragmentPath = "resources/shaders/one.frag";
+const int windowWidth = 800;
+const int windowHeight = 600;
 const GLfloat cameraSpeed = 3.0f;
 
-GLfloat vertices[] = {
-        // Positions          // Normals           // Texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-};
 
 int main(int argc, char **argv) {
   glewExperimental = GL_TRUE;
@@ -89,96 +44,33 @@ int main(int argc, char **argv) {
 
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
-  GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+  GLint flags;
+  glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
       glEnable(GL_DEBUG_OUTPUT);
-      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       glDebugMessageCallback(glDebugOutput, nullptr);
       glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
       std::cerr << "Debug context.\n";
     }
 
-  GLuint vbo, vao, lightVao;
-  glGenBuffers(1, &vbo);
-  glGenVertexArrays(1, &vao);
-  glGenVertexArrays(1, &lightVao);
-  glBindVertexArray(vao);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  //position attrib
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-  glEnableVertexAttribArray(0);
-
-  //surface normal attrib
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(1);
-
-  //texcoord attrib
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(2);
-
-  glBindVertexArray(0);
-
-  Material shaderOne({vertexPath, fragmentPath});
-  Material lampShader({vertexPath, lampShaderPath});
-
-  //init texture
-  GLuint texDiffuse = SOIL_load_OGL_texture(diffusePath.c_str(),
-                                            SOIL_LOAD_AUTO,
-                                            SOIL_CREATE_NEW_ID,
-                                            SOIL_FLAG_DDS_LOAD_DIRECT | SOIL_FLAG_SRGB_COLOR_SPACE);
-  if (texDiffuse == 0)
-    std::cerr << "SOIL2 goof" << __LINE__;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  //init texture
-  GLuint texSpecular = SOIL_load_OGL_texture(specularPath.c_str(),
-                                             SOIL_LOAD_AUTO,
-                                             SOIL_CREATE_NEW_ID,
-                                             SOIL_FLAG_DDS_LOAD_DIRECT);
-  if (texSpecular == 0)
-    std::cerr << "SOIL2 goof" << __LINE__;
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Shader shaderOne({vertexPath, fragmentPath});
+  Model myModel("resources/models/wt_teapot.obj");
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  //glEnable(GL_MULTISAMPLE);
+  glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
-  //glEnable(GL_CULL_FACE);
-  //glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   //glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //glEnable(GL_FRAMEBUFFER_SRGB);
+  glEnable(GL_FRAMEBUFFER_SRGB);
   glClearColor(0.2, 0.2, 0.25, 1.0);
 
 
-  shaderOne.SetUniform("diffuse", 0);
-  shaderOne.SetUniform("specular", 1);
-
-  std::vector<glm::vec3> cubePositions = {
-    glm::vec3( 0.0f,  0.0f,  0.0f),
-    glm::vec3( 2.0f,  5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3( 2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f,  3.0f, -7.5f),
-    glm::vec3( 1.3f, -2.0f, -2.5f),
-    glm::vec3( 1.5f,  2.0f, -2.5f),
-    glm::vec3( 1.5f,  0.2f, -1.5f),
-    glm::vec3(-1.3f,  1.0f, -1.5f)
-  };
+  glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
+  glm::quat cameraQuat;
 
   std::vector<glm::vec3> lightPositions = {
     glm::vec3( 0.7f,  0.2f,  2.0f),
@@ -186,9 +78,6 @@ int main(int argc, char **argv) {
     glm::vec3(-4.0f,  2.0f, -12.0f),
     glm::vec3( 0.0f,  0.0f, -3.0f)
   };
-
-  glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
-  glm::quat cameraQuat;
 
   SDL_Event windowEvent;
 
@@ -227,6 +116,7 @@ int main(int argc, char **argv) {
     GLfloat time = SDL_GetTicks() / 1000.0f;
     deltaTime = time - lastFrame;
     lastFrame = time;
+
     //do movement
     if (keys[SDL_SCANCODE_W])
       cameraPos += (glm::conjugate(cameraQuat) * glm::vec3(0.0f, 0.0f, -1.0f)) * cameraSpeed * deltaTime;
@@ -255,9 +145,9 @@ int main(int argc, char **argv) {
     if (keys[SDL_SCANCODE_ESCAPE])
       break;
 
-    glm::vec2 mouseDelta(mouseX, mouseY);
-    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseDelta.y * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseDelta.x * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+    //update camera
+    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseY * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseX * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
     mouseX = mouseY = 0;
     cameraQuat = deltaPitch * cameraQuat * deltaYaw;
     cameraQuat = glm::normalize(cameraQuat);
@@ -266,90 +156,28 @@ int main(int argc, char **argv) {
     translate = glm::translate(translate, -cameraPos);
     glm::mat4 view = rotate * translate;
 
-    for (unsigned int i = 0; i < lightPositions.size(); i++) {
-      if (i % 2) {
-        lightPositions[i].x = sin(time) / 1.5f;
-      }
-      else {
-        lightPositions[i].y = sin(time * 1.2f) / 1.5f;
-      }
-    }
+    //render
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    shaderOne.Use();
+    shaderOne.SetUniform("viewPos", cameraPos);
+    shaderOne.SetUniform("view", view);
+
+    shaderOne.SetUniform("dirLight.direction", glm::vec3(0.2f, 1.0f, 0.3f));
+
+    glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
+    shaderOne.SetUniform("proj", proj);
+
+    glm::mat4 model;
+    model = glm::translate(model, glm::vec3(sin(time)*1.5f, -1.75f, cos(time)*1.5f));
+    model = glm::scale(model, glm::vec3(1.2f, 1.2f, 1.2f));
+    shaderOne.SetUniform("model", model);
 
     //render
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderOne.Use();
-
-    shaderOne.SetUniform("viewPos", cameraPos);
-
-    for (unsigned int i = 0; i < lightPositions.size(); i++) {
-      using namespace std;
-      std::string p1 = "pointLights[";
-      std::string p2 = to_string(i);
-      shaderOne.SetUniform(p1 + p2 + string("].position"), lightPositions[i]);
-      shaderOne.SetUniform(p1 + p2 + string("].ambient"), glm::vec3(0.1f));
-      shaderOne.SetUniform(p1 + p2 + string("].diffuse"), glm::vec3(0.8f));
-      shaderOne.SetUniform(p1 + p2 + string("].specular"), glm::vec3(1.2f));
-      shaderOne.SetUniform(p1 + p2 + string("].constant"), 1.0f);
-      shaderOne.SetUniform(p1 + p2 + string("].linear"), 0.9f);
-      shaderOne.SetUniform(p1 + p2 + string("].quadratic"), 0.032f);
-    }
-    shaderOne.SetUniform("material.shininess", 128.0f);
-
-    shaderOne.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    shaderOne.SetUniform("dirLight.ambient", glm::vec3(0.05f));
-    shaderOne.SetUniform("dirLight.diffuse", glm::vec3(0.2f));
-    shaderOne.SetUniform("dirLight.specular", glm::vec3(0.7f));
-
-    glm::vec3 camFront = glm::eulerAngles(cameraQuat);
-    float z = -(cos(camFront.x) * cos(camFront.y));
-    float y = -(sin(camFront.x) * cos(camFront.y));
-    float x = sin(camFront.y);
-    shaderOne.SetUniform("spotLight.position", cameraPos);
-    shaderOne.SetUniform("spotLight.direction", glm::vec3(x, y, z));
-    shaderOne.SetUniform("spotLight.innerCutOff", glm::cos(glm::radians(12.5f)));
-    shaderOne.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-    shaderOne.SetUniform("spotLight.ambient", glm::vec3(0.1f));
-    shaderOne.SetUniform("spotLight.diffuse", glm::vec3(0.7f, 0.7f, 0.5f));
-    shaderOne.SetUniform("spotLight.specular", glm::vec3(0.7f));
-    shaderOne.SetUniform("spotLight.constant", 1.0f);
-    shaderOne.SetUniform("spotLight.linear", 0.09f);
-    shaderOne.SetUniform("spotLight.quadratic", 0.032f);
-
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texDiffuse);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texSpecular);
-    if (drawWireframe) {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-    glm::mat4 proj = glm::perspective(fov, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 100.0f);
-    shaderOne.SetUniform("view", view);
-    shaderOne.SetUniform("proj", proj);
-    glBindVertexArray(vao);
-    for (unsigned int i = 0; i < cubePositions.size(); i++) {
-      glm::mat4 model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-      model = glm::rotate(model, 15.0f * i, glm::vec3(1.0f, 0.5f, 0.5f));
-      shaderOne.SetUniform("model", model);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-  }
-
-    lampShader.Use();
-    for (unsigned int i = 0; i < lightPositions.size(); i++) {
-      glm::mat4 model = glm::translate(glm::mat4(1.0f), lightPositions[i]);
-      model = glm::scale(model, glm::vec3(0.2f));
-      lampShader.SetUniform("model", model);
-      lampShader.SetUniform("view", view);
-      lampShader.SetUniform("proj", proj);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
-    glBindVertexArray(0);
+    myModel.Draw(shaderOne);
 
     SDL_GL_SwapWindow(window);
 
@@ -363,8 +191,6 @@ int main(int argc, char **argv) {
   }
 
   //Clean Up
-  glDeleteVertexArrays(1, &vao);
-  glDeleteBuffers(1, &vbo);
   SDL_GL_DeleteContext(context);
   context = NULL;
   SDL_DestroyWindow(window);
@@ -375,8 +201,7 @@ int main(int argc, char **argv) {
 
 bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    std::cout << "SDL goofed: " << SDL_GetError() << std::endl;
-    LFC1_LOG_TRACE() << "SDL Goofed: " << SDL_GetError();
+    std::cout << "SDL error: " << SDL_GetError() << std::endl;
     return false;
   }
   else {
@@ -388,16 +213,17 @@ bool initSDL(SDL_Window *&window, SDL_GLContext &context) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
     window = SDL_CreateWindow("OpenGL Playground", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (window == NULL) {
-      std::cout << "window goof" << std::endl;
+      cout << "SDL error: failed to create window." << endl;
       return false;
     }
     context = SDL_GL_CreateContext(window);
+    //enable VSync
     SDL_GL_SetSwapInterval(1);
     return true;
   }

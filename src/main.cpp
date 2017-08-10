@@ -17,13 +17,15 @@
 #include "Shader.hpp"
 #include "Model.hpp"
 
+using namespace std;
+
 bool initSDL(SDL_Window *&window, SDL_GLContext &context);
 GLuint CreateTexture(char const* Filename);
 
-const std::string vertexPath = "resources/one.vert";
-const std::string fragmentPath = "resources/one.frag";
-const int windowWidth = 1920;
-const int windowHeight = 1080;
+const string vertexPath = "resources/shaders/one.vert";
+const string fragmentPath = "resources/shaders/one.frag";
+const int windowWidth = 800;
+const int windowHeight = 600;
 const GLfloat cameraSpeed = 3.0f;
 
 
@@ -38,7 +40,8 @@ int main(int argc, char **argv) {
 
   glewInit();
   glViewport(0, 0, windowWidth, windowHeight);
-  GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+  GLint flags;
+  glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
       glEnable(GL_DEBUG_OUTPUT);
@@ -49,7 +52,7 @@ int main(int argc, char **argv) {
     }
 
   Shader shaderOne({vertexPath, fragmentPath});
-  Model myModel("resources/wt_teapot.obj");
+  Model myModel("resources/models/wt_teapot.obj");
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_MULTISAMPLE);
@@ -136,9 +139,8 @@ int main(int argc, char **argv) {
       break;
 
     //update camera
-    glm::vec2 mouseDelta(mouseX, mouseY);
-    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseDelta.y * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseDelta.x * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat deltaPitch = glm::angleAxis(0.08f * mouseY * deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat deltaYaw = glm::angleAxis(0.08f * mouseX * deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
     mouseX = mouseY = 0;
     cameraQuat = deltaPitch * cameraQuat * deltaYaw;
     cameraQuat = glm::normalize(cameraQuat);

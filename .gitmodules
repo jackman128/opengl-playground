@@ -1,9 +1,3 @@
-[submodule "glm"]
-	path = glm
-	url = https://github.com/g-truc/glm.git
-[submodule "apitrace"]
-	path = apitrace
-	url = https://github.com/apitrace/apitrace.git
 [submodule "SOIL2"]
 	path = SOIL2
 	url = https://github.com/darsto/SOIL2.git

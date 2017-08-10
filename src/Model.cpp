@@ -6,7 +6,8 @@
 
 GLint TextureFromFile(const char* path, string directory);
 
-Model::Model(GLchar* path)
+Model::Model(GLchar* path) : meshes(vector<Mesh>()), texturesLoaded(vector<Texture>()),
+                             directory(string())
 {
   this->loadModel(path);
 }

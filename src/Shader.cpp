@@ -4,7 +4,8 @@
 
 using namespace boost::filesystem;
 
-Shader::Shader(const std::vector<std::string> &fnames) {
+Shader::Shader(const std::vector<std::string> &fnames)
+{
   for (std::string fname : fnames) {
     ShaderSrc src;
     path p(fname);

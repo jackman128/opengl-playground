@@ -44,7 +44,7 @@ void Mesh::Draw(Shader shader)
   GLuint diffuseNr = 1;
   GLuint specularNr = 1;
 
-  for (int i = 0; i < this->textures.size(); i++) {
+  for (unsigned int i = 0; i < this->textures.size(); i++) {
     glActiveTexture(GL_TEXTURE0 + i);
     stringstream ss;
     string name = this->textures[i].type;
@@ -62,7 +62,7 @@ void Mesh::Draw(Shader shader)
   glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
 
-  for (int i = 0; i < this->textures.size(); i++) {
+  for (unsigned int i = 0; i < this->textures.size(); i++) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
